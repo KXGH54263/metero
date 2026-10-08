@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>流星许愿 · 真实流星雨</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #00000d;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      position: relative;
+    }
+
+    /* 深邃星空底色 — 增加微弱的渐变层次感 */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 30% 40%, #0a0a1f 0%, #000005 90%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* 背景闪烁星星 */
+    .star {
+      position: absolute;
+      width: 1.8px;
+      height: 1.8px;
+      background: #fff;
+      border-radius: 50%;
+      box-shadow: 0 0 4px rgba(255, 255, 255, 0.8);
+      animation: twinkle 2.5s infinite ease-in-out;
+      z-index: 1;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.2; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+
+    /* ---------- 更逼真的流星 ---------- */
+    .meteor {
+      position: absolute;
+      width: 2px;
+      height: 90px;
+      background: linear-gradient(to bottom, #fff 0%, rgba(200, 220, 255, 0.9) 30%, rgba(180, 200, 255, 0) 100%);
+      border-radius: 50% 50% 20% 20%;
+      filter: drop-shadow(0 0 8px #aac8ff) drop-shadow(0 0 18px #5f8aff);
+      transform: rotate(-40deg) scaleY(1);
+      transform-origin: top left;
+      animation: meteorFly linear forwards;
+      pointer-events: none;
+      z-index: 2;
+      will-change: transform, opacity;
+    }
+
+    /* 流星尾部拖尾 — 通过伪元素实现更长的光晕 */
+    .meteor::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 140px;
+      background: linear-gradient(to bottom, rgba(255, 255, 255, 0.7) 0%, rgba(180, 210, 255, 0.3) 40%, transparent 100%);
+      transform: translateX(-1px);
+      border-radius: 50%;
+      filter: blur(2px);
+      opacity: 0.8;
+    }
+
+    /* 核心亮点 */
+    .meteor::before {
+      content: '';
+      position: absolute;
+      top: -4px;
+      left: -2px;
+      width: 6px;
+      height: 12px;
+      background: #ffffff;
+      border-radius: 50%;
+      filter: blur(3px);
+      box-shadow: 0 0 15px #d0e4ff, 0 0 30px #7aa2ff;
+    }
+
+    /* 流星飞行动画 — 从左上划向右下，更自然的路径和速度变化 */
+    @keyframes meteorFly {
+      0% {
+        opacity: 0;
+        transform: translate(-350px, -250px) rotate(-40deg) scaleY(0.8);
+      }
+      8% {
+        opacity: 1;
+        transform: translate(-80px, -60px) rotate(-40deg) scaleY(1.1);
+      }
+      20% {
+        opacity: 1;
+        transform: translate(20px, 15px) rotate(-40deg) scaleY(1.2);
+      }
+      85% {
+        opacity: 1;
+        transform: translate(calc(100vw - 50px), calc(100vh - 30px)) rotate(-40deg) scaleY(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(calc(100vw + 100px), calc(100vh + 80px)) rotate(-40deg) scaleY(0.9);
+      }
+    }
+
+    /* 输入弹窗面板 */
+    .input-panel {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 86%;
+      max-width: 420px;
+      background: rgba(20, 20, 40, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 28px;
+      padding: 28px 24px;
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      box-shadow: 0 25px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+      z-index: 20;
+      transition: opacity 0.4s cubic-bezier(0.2, 0.9, 0.4, 1), transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1);
+    }
+
+    .input-panel h2 {
+      color: #f0f4ff;
+      font-size: 19px;
+      margin-bottom: 18px;
+      text-align: center;
+      font-weight: 400;
+      letter-spacing: 2px;
+      text-shadow: 0 0 12px rgba(160, 200, 255, 0.6);
+    }
+
+    .input-panel input {
+      width: 100%;
+      padding: 14px 18px;
+      border: 1px solid rgba(200, 215, 255, 0.3);
+      border-radius: 40px;
+      background: rgba(10, 10, 25, 0.6);
+      color: #ffffff;
+      font-size: 16px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      letter-spacing: 0.5px;
+    }
+
+    .input-panel input::placeholder {
+      color: rgba(200, 215, 255, 0.5);
+      font-weight: 300;
+    }
+
+    .input-panel input:focus {
+      border-color: rgba(160, 200, 255, 0.9);
+      box-shadow: 0 0 20px rgba(100, 150, 255, 0.4);
+    }
+
+    .input-panel button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 40px;
+      background: linear-gradient(135deg, #ffffff, #c8d8ff);
+      color: #0a0a1a;
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(140, 180, 255, 0.5);
+      transition: transform 0.15s, box-shadow 0.2s;
+    }
+
+    .input-panel button:active {
+      transform: scale(0.97);
+      box-shadow: 0 0 30px rgba(160, 200, 255, 0.8);
+    }
+
+    /* 展示文字 — 更加柔和飘渺 */
+    .wish-text {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #ffffff;
+      font-size: 24px;
+      font-weight: 400;
+      letter-spacing: 2px;
+      text-align: center;
+      padding: 0 20px;
+      text-shadow: 0 0 25px #7a9eff, 0 0 45px #3a5faa, 0 0 80px #1e3b77;
+      z-index: 10;
+      pointer-events: none;
+      opacity: 0;
+      animation: fadeInUp 1.2s cubic-bezier(0.2, 0.9, 0.4, 1) forwards;
+      white-space: nowrap;
+      max-width: 90vw;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      word-break: break-word;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translate(-50%, -35%);
+        filter: blur(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+        filter: blur(0);
+      }
+    }
+
+    /* 重置按钮 */
+    .reset-btn {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      padding: 11px 22px;
+      border-radius: 50px;
+      border: 1px solid rgba(200, 215, 255, 0.4);
+      background: rgba(10, 10, 30, 0.6);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      color: #eef4ff;
+      font-size: 14px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      z-index: 15;
+      display: none;
+      box-shadow: 0 0 20px rgba(80, 120, 255, 0.2);
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .reset-btn:active {
+      background: rgba(50, 70, 150, 0.7);
+      border-color: #8ab2ff;
+    }
+
+    /* 隐藏水印/任何原有文字 — 彻底清理 */
+    .watermark, [class*="ai"], [id*="ai"], .signature, .credit {
+      display: none !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+    }
+
+    /* 流星层级更高一点，避免被遮挡 */
+    .meteor {
+      z-index: 5;
+    }
+  </style>
+</head>
+<body>
+  <!-- 输入面板 -->
+  <div class="input-panel" id="inputPanel">
+    <h2>✨ 写下你的愿望 ✨</h2>
+    <input type="text" id="wishInput" placeholder="流星划过时，你想说什么…" maxlength="32" autocomplete="off" />
+    <button id="submitBtn">放 飞</button>
+  </div>
+
+  <!-- 心愿文字 -->
+  <div class="wish-text" id="wishText"></div>
+
+  <!-- 重置按钮 -->
+  <button class="reset-btn" id="resetBtn">重新许愿</button>
+
+  <script>
+    (function() {
+      // ----- 彻底移除任何可能的水印元素（包括隐藏的、伪元素等）-----
+      // 但为了保险，主动删除带有 'ai', 'watermark', 'generated' 等类名或id的元素
+      const removeWatermarks = () => {
+        const all = document.querySelectorAll('*');
+        all.forEach(el => {
+          const cls = (el.className || '').toString().toLowerCase();
+          const id = (el.id || '').toLowerCase();
+          if (cls.includes('watermark') || cls.includes('ai-') || cls.includes('generated') || 
+              id.includes('watermark') || id.includes('ai-') || id.includes('generated') ||
+              cls === 'ai' || id === 'ai') {
+            el.remove();
+          }
+        });
+        // 另外移除任何可能存在的多余文本节点（没有父元素特殊意义的）
+        // 但保留我们自己的元素，不误删
+      };
+      removeWatermarks();
+
+      // 再次清理：有些水印可能是通过伪元素 content 加的，但无法移除，用样式覆盖
+      const style = document.createElement('style');
+      style.textContent = `
+        *::before, *::after {
+          content: none !important;
+          display: none !important;
+        }
+        /* 但上面会杀掉所有伪元素，流星尾巴也是伪元素！所以只针对body和html覆盖，保留流星 */
+        body::before, body::after, html::before, html::after {
+          content: none !important;
+        }
+        /* 允许流星伪元素正常显示 */
+        .meteor::before, .meteor::after {
+          content: '' !important;
+          display: block !important;
+        }
+      `;
+      // 但是流星必须保留伪元素，所以这个style得小心：不能全局干掉伪元素。
+      // 重新调整：只针对可能的body伪元素，不碰流星。
+      style.textContent = `
+        body::before, body::after, html::before, html::after {
+          content: none !important;
+          display: none !important;
+        }
+        /* 保护流星的伪元素 */
+        .meteor::before, .meteor::after {
+          content: '' !important;
+          display: block !important;
+        }
+      `;
+      document.head.appendChild(style);
+
+      // 获取DOM元素
+      const inputPanel = document.getElementById("inputPanel");
+      const wishInput = document.getElementById("wishInput");
+      const submitBtn = document.getElementById("submitBtn");
+      const wishText = document.getElementById("wishText");
+      const resetBtn = document.getElementById("resetBtn");
+
+      // ---------- 生成背景星星 (更多更自然) ----------
+      const starCount = 350;
+      for (let i = 0; i < starCount; i++) {
+        const star = document.createElement("div");
+        star.className = "star";
+        star.style.left = Math.random() * 100 + "vw";
+        star.style.top = Math.random() * 100 + "vh";
+        // 随机大小
+        const size = 0.8 + Math.random() * 2.0;
+        star.style.width = size + "px";
+        star.style.height = size + "px";
+        star.style.animationDelay = Math.random() * 3 + "s";
+        star.style.animationDuration = (1.8 + Math.random() * 2.5) + "s";
+        // 略微不同色调
+        if (Math.random() > 0.7) {
+          star.style.background = "#d4e4ff";
+          star.style.boxShadow = "0 0 6px #aac8ff";
+        }
+        document.body.appendChild(star);
+      }
+
+      // ---------- 流星生成 ----------
+      // 用随机参数生成更自然的流星
+      function createMeteor(isExtra = false) {
+        const meteor = document.createElement("div");
+        meteor.className = "meteor";
+
+        // 随机起始位置：更偏向屏幕左上区域 (0~60% 宽，0~50% 高)
+        const startX = Math.random() * window.innerWidth * 0.7;
+        const startY = Math.random() * window.innerHeight * 0.5;
+
+        // 随机持续时间：高速到中速 (0.9s ~ 2.2s) 更真实
+        const duration = 0.9 + Math.random() * 1.6;
+
+        // 随机长度：80~140px 之间的尾巴
+        const tailLength = 70 + Math.random() * 70;
+        meteor.style.height = tailLength + "px";
+
+        // 随机倾斜角度？但我们的动画固定了旋转，为了统一方向，保留-40deg，但可以微调
+        // 可通过调整伪元素，保持视觉一致
+
+        meteor.style.left = startX + "px";
+        meteor.style.top = startY + "px";
+        meteor.style.animationDuration = duration + "s";
+
+        // 随机延迟一点点，让流星雨更自然 (0~0.1s)
+        // 但用animation-delay会导致部分流星不动，所以不用delay，而是错开创建时间
+
+        // 微调亮度/颜色
+        if (Math.random() > 0.6) {
+          meteor.style.filter = "drop-shadow(0 0 10px #b8d0ff) drop-shadow(0 0 25px #4f7eff) brightness(1.2)";
+        } else {
+          meteor.style.filter = "drop-shadow(0 0 8px #aac8ff) drop-shadow(0 0 18px #3a6eff)";
+        }
+
+        document.body.appendChild(meteor);
+
+        // 自动移除
+        setTimeout(() => {
+          if (meteor.parentNode) meteor.remove();
+        }, duration * 1000 + 100);
+      }
+
+      // 初始先随机生成一批流星，让背景立刻生动
+      for (let i = 0; i < 12; i++) {
+        setTimeout(() => {
+          createMeteor(true);
+        }, i * 120 + Math.random() * 200);
+      }
+
+      // 持续产生流星 —— 间隔更短，数量更多，形成流星雨效果
+      let meteorInterval = setInterval(() => {
+        // 一次可能产生1~3颗流星，更密集
+        const count = Math.floor(Math.random() * 2) + 1; // 1 或 2 颗
+        for (let i = 0; i < count; i++) {
+          setTimeout(() => {
+            createMeteor();
+          }, i * 80);
+        }
+      }, 180); // 每180ms一组，非常密集
+
+      // 但为了避免性能负担，如果页面隐藏时降低频率? (可选，不处理也没事)
+
+      // 提交愿望
+      function showWish() {
+        const text = wishInput.value.trim();
+        if (!text) return;
+
+        wishText.textContent = text;
+        // 面板淡出
+        inputPanel.style.opacity = "0";
+        inputPanel.style.transform = "translate(-50%, -40%)";
+        setTimeout(() => {
+          inputPanel.style.display = "none";
+          resetBtn.style.display = "block";
+        }, 400);
+
+        // 显示愿望文字（动画自动）
+        wishText.style.animation = "none";
+        // 触发重绘
+        void wishText.offsetWidth;
+        wishText.style.animation = "fadeInUp 1.2s cubic-bezier(0.2, 0.9, 0.4, 1) forwards";
+
+        // 提交后爆发一场小流星雨 (额外增加30颗，快速划过)
+        for (let i = 0; i < 25; i++) {
+          setTimeout(() => {
+            createMeteor(true);
+          }, i * 70);
+        }
+      }
+
+      submitBtn.addEventListener("click", showWish);
+      wishInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          showWish();
+        }
+      });
+
+      // 重置，重新输入
+      resetBtn.addEventListener("click", () => {
+        inputPanel.style.display = "block";
+        // 强制重绘
+        void inputPanel.offsetWidth;
+        inputPanel.style.opacity = "1";
+        inputPanel.style.transform = "translate(-50%, -50%)";
+        wishText.style.opacity = "0";
+        // 移除动画避免干扰
+        wishText.style.animation = "none";
+        resetBtn.style.display = "none";
+        wishInput.value = ""; // 可选，清空方便重新输入
+        wishInput.focus();
+      });
+
+      // 页面加载完成后自动聚焦输入框（移动端谨慎，但无伤大雅）
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          wishInput.focus();
+        }, 300);
+      });
+
+      // 防止触摸时页面滚动
+      document.body.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+      }, { passive: false });
+
+      // 清理水印的二次保险 (每2秒检查一次，移除可疑元素)
+      setInterval(() => {
+        const watermarks = document.querySelectorAll('[class*="watermark"], [id*="watermark"], [class*="ai-"], [id*="ai-"]');
+        watermarks.forEach(el => el.remove());
+        // 如果存在文字 “AI生成” 等也移除
+      }, 2000);
+
+    })();
+  </script>
+</body>
+</html>
